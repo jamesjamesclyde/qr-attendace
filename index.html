@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QR Attendance Scanner</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    #reader { width: 300px; margin: auto; }
+    .log { margin-top: 20px; color: green; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>📷 QR Attendance Scanner</h1>
+  <div id="reader"></div>
+  <div class="log" id="log">Waiting for scan...</div>
+
+  <script>
+    const scriptBase = "https://script.google.com/macros/s/AKfycbxGbNW7fNPuoc3FAqgCYDgnciqez4WccV6EDpG0aiHVJg3xuzQX2TJEF4FOcmNMpqwT/exec"; // <-- RESET: Insert your Apps Script URL here later
+
+    function sendAttendance(student) {
+      if (!scriptBase) {
+        document.getElementById("log").innerText = "Script URL not set.";
+        return;
+      }
+      const url = `${scriptBase}?student=${encodeURIComponent(student)}`;
+      fetch(url)
+        .then(res => res.text())
+        .then(msg => {
+          document.getElementById("log").innerText = msg + " ✅";
+          setTimeout(() => document.getElementById("log").innerText = "Waiting for scan...", 2000);
+        })
+        .catch(err => {
+          document.getElementById("log").innerText = "❌ Error logging attendance";
+        });
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+      sendAttendance(decodedText);
+    }
+
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+      "reader", { fps: 10, qrbox: 250 }, false
+    );
+    html5QrcodeScanner.render(onScanSuccess);
+  </script>
+</body>
+</html>
